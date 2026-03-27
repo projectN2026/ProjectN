@@ -12,8 +12,10 @@ public class BaseBehaviour : MonoBehaviour
     protected virtual void Update() { }
     protected virtual void LateUpdate() { }
     protected virtual void FixedUpdate() { }
-    protected virtual void OnTriggerEnter2D(Collider2D collision) { }
     protected virtual void OnCollisionEnter2D(Collision2D collision) { }
+    protected virtual void OnCollisionExit2D(Collision2D collision) { }
+    protected virtual void OnTriggerEnter2D(Collider2D collision) { }
+    protected virtual void OnTriggerExit2D(Collider2D collision) { }
 
     protected void TryInit()
     {
