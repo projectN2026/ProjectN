@@ -7,13 +7,18 @@ public class SingletonBehaviour<T> : BaseBehaviour where T : SingletonBehaviour<
     {
         get 
         { 
-            if (s_instance == null)
-            {
-                var go = new GameObject(typeof(T).Name);
-                DontDestroyOnLoad(go);
-                s_instance = go.AddComponent<T>();
-            }
-            return s_instance; 
+            if (s_instance != null)
+                return s_instance; 
+
+            s_instance = FindAnyObjectByType<T>();
+            if (s_instance != null)
+                return s_instance;
+
+            var go = new GameObject(typeof(T).Name);
+            DontDestroyOnLoad(go);
+            s_instance = go.AddComponent<T>();
+
+            return s_instance;
         }
     }
 
