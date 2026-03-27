@@ -43,7 +43,7 @@ public class ObjectController : BaseBehaviour
         var x = MainCollider.bounds.center.x;
         var y = MainCollider.bounds.min.y;
         var p = new Vector2(x, y);
-        var r = 0.5f;
+        var r = 0.2f;
         var layer = 1 << LayerMask.NameToLayer("Ground");
         var result = Physics2D.OverlapCircle(p, r, layer) != null;
         return result;
