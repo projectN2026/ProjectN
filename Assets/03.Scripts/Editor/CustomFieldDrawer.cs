@@ -3,7 +3,7 @@ using UnityEngine;
 
 [CustomPropertyDrawer(typeof(ComponentField))]
 [CustomPropertyDrawer(typeof(DescendantField))]
-public class SerializeFieldDrawer : PropertyDrawer
+public class CustomFieldDrawer : PropertyDrawer
 {
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {

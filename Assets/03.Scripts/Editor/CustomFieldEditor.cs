@@ -6,7 +6,7 @@ using UnityEngine;
 
 [CustomEditor(typeof(BaseBehaviour), true)]
 [CanEditMultipleObjects]
-public class SerializeFieldEditor : Editor
+public class CustomFieldEditor : Editor
 {
     #region Custom Editor
     const string MENU_INJECT_FROM_HIERARCHY = "GameObject/** Inject Fields From Hierarchy **";
