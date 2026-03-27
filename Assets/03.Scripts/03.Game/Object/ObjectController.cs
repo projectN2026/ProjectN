@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class CharacterController : BaseBehaviour
+public class ObjectController : BaseBehaviour
 {
     [field: SerializeField, ComponentField] public Rigidbody2D Rigidbody { get; private set; }
     [field: SerializeField, DescendantField] public Collider2D MainCollider { get; private set; }
@@ -8,18 +8,7 @@ public class CharacterController : BaseBehaviour
     public float MoveSpeed { get; } = 6f;
     public float JumpPower { get; } = 10f;
     public float Gravity { get; } = 0.5f;
-    public bool IsGround { get; private set; }
 
-    protected override void OnCollisionEnter2D(Collision2D collision)
-    {
-        base.OnCollisionEnter2D(collision);
-        IsGround = true;
-    }
-    protected override void OnCollisionExit2D(Collision2D collision)
-    {
-        base.OnCollisionExit2D(collision);
-        IsGround = false;
-    }
     protected override void FixedUpdate()
     {
         base.FixedUpdate();
