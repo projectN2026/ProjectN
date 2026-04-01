@@ -6,7 +6,7 @@ public class CameraController : BaseBehaviour
     {
         base.FixedUpdate();
 
-        var target = Game.Instance.Object.transform;
+        var target = ObjectManager.Instance.Player.transform;
 
         transform.position = Vector3.Lerp(transform.position, target.position, 0.1f);
     }
