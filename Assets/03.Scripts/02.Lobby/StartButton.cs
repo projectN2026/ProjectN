@@ -1,16 +1,15 @@
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.UI;
 
-public class StartButton : MonoBehaviour
+public class StartButton : BaseBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    [field: SerializeField, ComponentField]
+    private Button _button;
 
-    // Update is called once per frame
-    void Update()
+    protected override void OnInit()
     {
-        
+        base.OnInit();
+
+
     }
 }
