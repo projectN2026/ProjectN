@@ -3,7 +3,7 @@
 public class SingletonBehaviour<T> : BaseBehaviour where T : SingletonBehaviour<T>
 {
     private static T s_instance;
-    public static T Instance
+    protected static T Instance
     {
         get 
         { 

@@ -10,6 +10,11 @@ public class StartButton : BaseBehaviour
     {
         base.OnInit();
 
+        _button.onClick.AddListener(OnClick);
+    }
 
+    private void OnClick()
+    {
+        SceneLoader.Load(SceneType.GameScene);
     }
 }

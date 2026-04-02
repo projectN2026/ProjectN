@@ -6,8 +6,11 @@ public class CameraController : BaseBehaviour
     {
         base.FixedUpdate();
 
-        var target = ObjectManager.Instance.Player.transform;
+        var target = ObjectManager.Player;
+        if (target == null)
+            return;
 
-        transform.position = Vector3.Lerp(transform.position, target.position, 0.1f);
+        var targetPosition = target.transform.position;
+        transform.position = Vector3.Lerp(transform.position, targetPosition, 0.1f);
     }
 }

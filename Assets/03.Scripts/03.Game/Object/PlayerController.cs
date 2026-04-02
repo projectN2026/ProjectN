@@ -4,13 +4,11 @@ public class PlayerController : ObjectController
 {
     public float MoveSpeed { get; } = 6f;
     public float JumpPower { get; } = 10f;
-    public float Gravity { get; } = 0.5f;
 
     protected override void FixedUpdate()
     {
         base.FixedUpdate();
         UpdateMove();
-        UpdateFall();
     }
     protected override void Update()
     {
@@ -25,10 +23,6 @@ public class PlayerController : ObjectController
         if (Input.GetKey(KeyCode.D)) input++;
 
         Rigidbody.linearVelocityX = input * MoveSpeed;
-    }
-    private void UpdateFall()
-    {
-        Rigidbody.linearVelocityY -= Gravity;
     }
     private void UpdateJump()
     {
