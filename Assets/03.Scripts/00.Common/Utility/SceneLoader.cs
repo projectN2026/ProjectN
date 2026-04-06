@@ -4,7 +4,6 @@ using UnityEngine.SceneManagement;
 public enum SceneType
 {
     None,
-    TitleScene,
     LobbyScene,
     GameScene,
 }
