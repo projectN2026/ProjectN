@@ -103,6 +103,31 @@ public class SerializeFieldEditor : Editor
         EditorUtility.SetDirty(target);
     }
 
+    static void InjectFromSceneObject(GameObject root)
+    {
+        var components = root.GetComponentsInChildren<MonoBehaviour>(true);
+        foreach (var com in components)
+        {
+            if (PrefabUtility.IsPartOfNonAssetPrefabInstance(com.gameObject))
+                continue;
+
+            InjectFields(com);
+        }
+    } 
+    static void InjectFromPrefabAsset(GameObject prefabRoot)
+    {
+        var components = prefabRoot.GetComponentsInChildren<MonoBehaviour>(true);
+        foreach (var com in components)
+        {
+            if (PrefabUtility.GetNearestPrefabInstanceRoot(com.gameObject) != prefabRoot)
+                continue;
+
+            InjectFields(com);
+        }
+
+        PrefabUtility.SavePrefabAsset(prefabRoot);
+    }
+
     #region Custom Editor
     const string HierarchyMenuPath = "GameObject/** Inject Fields From Hierarchy **";
     const string PrefabMenuPath = "Assets/** Inject Fields From Prefabs **";
@@ -143,18 +168,7 @@ public class SerializeFieldEditor : Editor
     {
         foreach (var obj in Selection.gameObjects)
         {
-            if (PrefabUtility.IsPartOfPrefabAsset(obj) ||
-                PrefabUtility.IsPartOfNonAssetPrefabInstance(obj))
-                continue;
-
-            var targets = obj.GetComponentsInChildren<MonoBehaviour>(true);
-            foreach (var target in targets)
-            {
-                if (PrefabUtility.IsPartOfNonAssetPrefabInstance(target))
-                    continue;
-
-                InjectFields(target);
-            }
+            InjectFromSceneObject(obj);
         }
     }
 
@@ -178,14 +192,7 @@ public class SerializeFieldEditor : Editor
     {
         foreach (var obj in Selection.gameObjects)
         {
-            if (!PrefabUtility.IsPartOfPrefabAsset(obj))
-                continue;
-
-            var targets = obj.GetComponentsInChildren<MonoBehaviour>(true);
-            foreach (var target in targets)
-                InjectFields(target);
-
-            PrefabUtility.SavePrefabAsset(obj);
+            InjectFromPrefabAsset(obj);
         }
     }
     #endregion
