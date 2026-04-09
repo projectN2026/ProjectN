@@ -8,11 +8,6 @@ using UnityEngine;
 [CanEditMultipleObjects]
 public class SerializeFieldEditor : Editor
 {
-    static bool IsTarget(MonoBehaviour target)
-    {
-        return target.GetType().IsDefined(typeof(InjectionByEditor), true);
-    }
-
     static Transform GetDescendantRecursive(Transform target, string name)
     {
         foreach (Transform child in target)
@@ -27,6 +22,10 @@ public class SerializeFieldEditor : Editor
         return null;
     }
 
+    static bool IsTargetComponent(MonoBehaviour target)
+    {
+        return target.GetType().IsDefined(typeof(InjectionByEditor), true);
+    }
     static IEnumerable<FieldInfo> GetFields(MonoBehaviour target)
     {
         var type = target.GetType();
@@ -64,7 +63,7 @@ public class SerializeFieldEditor : Editor
     }
     static void InjectFields(MonoBehaviour target)
     {
-        if (!IsTarget(target))
+        if (!IsTargetComponent(target))
             return;
 
         foreach (var field in GetFields(target))
@@ -105,8 +104,8 @@ public class SerializeFieldEditor : Editor
     }
 
     #region Custom Editor
-    const string MENU_INJECT_FROM_HIERARCHY = "GameObject/** Inject Fields From Hierarchy **";
-    const string MENU_INJECT_FROM_PREFABS = "Assets/** Inject Fields From Prefabs **";
+    const string HierarchyMenuPath = "GameObject/** Inject Fields From Hierarchy **";
+    const string PrefabMenuPath = "Assets/** Inject Fields From Prefabs **";
 
     public override void OnInspectorGUI()
     {
@@ -114,7 +113,7 @@ public class SerializeFieldEditor : Editor
 
         var targetObject = (MonoBehaviour)target;
 
-        if (!IsTarget(targetObject))
+        if (!IsTargetComponent(targetObject))
             return;
 
         if (GUILayout.Button("Find Components"))
@@ -124,8 +123,8 @@ public class SerializeFieldEditor : Editor
             ClearFields(targetObject);
     }
 
-    [MenuItem(MENU_INJECT_FROM_HIERARCHY, true)]
-    static bool ValidateInjectFieldsFromHierarchy()
+    [MenuItem(HierarchyMenuPath, true)]
+    static bool ValidateHierarchyMenu()
     {
         var objects = Selection.objects;
         var gameObjects = Selection.gameObjects;
@@ -139,18 +138,16 @@ public class SerializeFieldEditor : Editor
         }
         return true;
     }
-    [MenuItem(MENU_INJECT_FROM_HIERARCHY, false, -900)]
-    static void InjectFieldsFromHierarchy()
+    [MenuItem(HierarchyMenuPath, false, -900)]
+    static void HierarchyMenu()
     {
-        var objects = Selection.gameObjects;
-
-        foreach (var selected in objects)
+        foreach (var obj in Selection.gameObjects)
         {
-            if (PrefabUtility.IsPartOfPrefabAsset(selected) ||
-                PrefabUtility.IsPartOfNonAssetPrefabInstance(selected))
+            if (PrefabUtility.IsPartOfPrefabAsset(obj) ||
+                PrefabUtility.IsPartOfNonAssetPrefabInstance(obj))
                 continue;
 
-            var targets = selected.GetComponentsInChildren<MonoBehaviour>(true);
+            var targets = obj.GetComponentsInChildren<MonoBehaviour>(true);
             foreach (var target in targets)
             {
                 if (PrefabUtility.IsPartOfNonAssetPrefabInstance(target))
@@ -161,8 +158,8 @@ public class SerializeFieldEditor : Editor
         }
     }
 
-    [MenuItem(MENU_INJECT_FROM_PREFABS, true)]
-    static bool ValidateInjectFieldsFromPrefabs()
+    [MenuItem(PrefabMenuPath, true)]
+    static bool ValidatePrefabMenu()
     {
         var objects = Selection.objects;
         var gameObjects = Selection.gameObjects;
@@ -176,21 +173,19 @@ public class SerializeFieldEditor : Editor
         }
         return true;
     }
-    [MenuItem(MENU_INJECT_FROM_PREFABS, false, -900)]
-    static void InjectFieldsFromPrefabs()
+    [MenuItem(PrefabMenuPath, false, -900)]
+    static void Prefabmenu()
     {
-        var objects = Selection.gameObjects;
-
-        foreach (var selected in objects)
+        foreach (var obj in Selection.gameObjects)
         {
-            if (!PrefabUtility.IsPartOfPrefabAsset(selected))
+            if (!PrefabUtility.IsPartOfPrefabAsset(obj))
                 continue;
 
-            var targets = selected.GetComponentsInChildren<MonoBehaviour>(true);
+            var targets = obj.GetComponentsInChildren<MonoBehaviour>(true);
             foreach (var target in targets)
                 InjectFields(target);
 
-            PrefabUtility.SavePrefabAsset(selected);
+            PrefabUtility.SavePrefabAsset(obj);
         }
     }
     #endregion
