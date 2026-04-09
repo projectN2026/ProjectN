@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [CustomEditor(typeof(MonoBehaviour), true)]
 [CanEditMultipleObjects]
@@ -116,11 +119,30 @@ public class SerializeFieldEditor : Editor
     } 
     static void InjectFromPrefabAsset(GameObject prefabRoot)
     {
+        // 읽기 전용 프리팹 스킵
+        var assetPath = AssetDatabase.GetAssetPath(prefabRoot);
+        if (!AssetDatabase.IsOpenForEdit(assetPath))
+        {
+            Debug.Log($"읽기 전용 프리펩 스킵: {prefabRoot.name}", prefabRoot);
+            return;
+        }
+
         var components = prefabRoot.GetComponentsInChildren<MonoBehaviour>(true);
+        if (components.Any(c => c == null))
+        {
+            Debug.Log($"missing script가 있는 프리펩 스킵: {prefabRoot.name}", prefabRoot);
+            return;
+        }
+
         foreach (var com in components)
         {
-            if (PrefabUtility.GetNearestPrefabInstanceRoot(com.gameObject) != prefabRoot)
+            // 이 컴포넌트의 원본 프리팹이 prefabRoot인지 확인
+            var source = PrefabUtility.GetCorrespondingObjectFromSource(com.gameObject);
+            if (source != null && AssetDatabase.GetAssetPath(source) != assetPath)
+            {
+                Debug.Log($"프리펩 속의 프리펩 스킵: {prefabRoot.name}", prefabRoot);
                 continue;
+            }
 
             InjectFields(com);
         }
@@ -128,7 +150,67 @@ public class SerializeFieldEditor : Editor
         PrefabUtility.SavePrefabAsset(prefabRoot);
     }
 
+    static void InjectFromAllScenes()
+    {
+        // 현재 열린 씬들 처리 및 경로 기억
+        var openScenePaths = new List<string>();
+        for (int i = 0; i < SceneManager.sceneCount; i++)
+        {
+            var scene = SceneManager.GetSceneAt(i);
+            if (scene.isLoaded == false)
+                continue;
+
+            openScenePaths.Add(scene.path);
+
+            foreach (var root in scene.GetRootGameObjects())
+                InjectFromSceneObject(root);
+
+            if (scene.isDirty)
+                EditorSceneManager.SaveScene(scene);
+        }
+
+        foreach (var buildSettingsScene in EditorBuildSettings.scenes)
+        {
+            // 빌드세팅에서 체크박스 꺼진 씬 스킵
+            if (!buildSettingsScene.enabled)
+                continue;
+            // 위에서 처리한 현재 열린 씬 스킵
+            if (openScenePaths.Contains(buildSettingsScene.path))
+                continue;
+
+            var scene = EditorSceneManager.OpenScene(buildSettingsScene.path, OpenSceneMode.Single);
+            foreach (var root in scene.GetRootGameObjects())
+                InjectFromSceneObject(root);
+
+            EditorSceneManager.SaveScene(scene);
+        }
+
+        // 원래 열려있던 씬들 복구
+        for (int i = 0; i < openScenePaths.Count; i++)
+        {
+            if (i == 0)
+                EditorSceneManager.OpenScene(openScenePaths[i], OpenSceneMode.Single);
+            else
+                EditorSceneManager.OpenScene(openScenePaths[i], OpenSceneMode.Additive);
+        }
+    }
+    static void InjectFromAllPrefabs()
+    {
+        var guids = AssetDatabase.FindAssets("t:Prefab", new[] { "Assets" });
+
+        foreach (var guid in guids)
+        {
+            var path = AssetDatabase.GUIDToAssetPath(guid);
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            if (prefab == null) 
+                continue;
+
+            InjectFromPrefabAsset(prefab);
+        }
+    }
+
     #region Custom Editor
+    const string TopMenuPath = "Tools/** Auto Inject Fields **";
     const string HierarchyMenuPath = "GameObject/** Inject Fields From Hierarchy **";
     const string PrefabMenuPath = "Assets/** Inject Fields From Prefabs **";
 
@@ -146,6 +228,19 @@ public class SerializeFieldEditor : Editor
 
         if (GUILayout.Button("Clear Components"))
             ClearFields(targetObject);
+    }
+
+    [MenuItem(TopMenuPath)]
+    static void TopMenu()
+    {
+        try
+        {
+            InjectFromAllScenes();
+        }
+        finally
+        {
+            InjectFromAllPrefabs();
+        }
     }
 
     [MenuItem(HierarchyMenuPath, true)]
