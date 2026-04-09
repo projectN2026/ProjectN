@@ -54,20 +54,40 @@ public class SerializeFieldEditor : Editor
             type = type.BaseType;
         }
     }
-    static void ClearFields(MonoBehaviour target)
+    static bool ClearFields(MonoBehaviour target)
     {
+        if (!IsTargetComponent(target))
+            return false;
+
+        bool isChanged = false;
+
         foreach (var field in GetFields(target))
         {
             if (Attribute.IsDefined(field, typeof(ComponentField)) ||
                 Attribute.IsDefined(field, typeof(DescendantField)))
+            {
+                if (field.FieldType.IsValueType)
+                    continue;
+
+                if (field.GetValue(target) == null)
+                    continue;
+
                 field.SetValue(target, null);
+                isChanged = true;
+            }
         }
-        EditorUtility.SetDirty(target);
+
+        if (isChanged)
+            EditorUtility.SetDirty(target);
+        
+        return isChanged;
     }
-    static void InjectFields(MonoBehaviour target)
+    static bool InjectFields(MonoBehaviour target)
     {
         if (!IsTargetComponent(target))
-            return;
+            return false;
+
+        bool isChanged = false;
 
         foreach (var field in GetFields(target))
         {
@@ -77,10 +97,17 @@ public class SerializeFieldEditor : Editor
             if (Attribute.IsDefined(field, typeof(ComponentField)))
             {
                 var component = target.GetComponent(fieldType);
-                field.SetValue(target, component);
-
                 if (component == null)
+                {
                     Debug.LogWarning($"{target.gameObject.name}에서 {fieldType.Name} 컴포넌트를 찾지 못함", target);
+                    continue;
+                }
+
+                if (Equals(field.GetValue(target), component))
+                    continue;
+
+                field.SetValue(target, component);
+                isChanged = true;
             }
 
             // DescendantField injection
@@ -94,16 +121,30 @@ public class SerializeFieldEditor : Editor
 
                 var descendant = GetDescendantRecursive(target.transform, nameTofind);
                 var descendantComponent = descendant?.GetComponent(fieldType);
-                field.SetValue(target, descendantComponent);
 
                 if (descendant == null)
+                {
                     Debug.LogWarning($"{target.gameObject.name}에서 {nameTofind} 이름의 자식을 찾지 못함", target);
-                else
-                if (descendantComponent == null)
+                    continue;
+                }
+                else if (descendantComponent == null)
+                {
                     Debug.LogWarning($"{target.gameObject.name}의 자식 {descendant.gameObject.name}에서 {fieldType.Name} 컴포넌트를 찾지 못함", target);
+                    continue;
+                }
+
+                if (Equals(field.GetValue(target), descendantComponent))
+                    continue;
+
+                field.SetValue(target, descendantComponent);
+                isChanged = true;
             }
         }
-        EditorUtility.SetDirty(target);
+
+        if (isChanged)
+            EditorUtility.SetDirty(target);
+
+        return isChanged;
     }
 
     static void InjectFromSceneObject(GameObject root)
@@ -134,6 +175,8 @@ public class SerializeFieldEditor : Editor
             return;
         }
 
+        bool isChanged = false;
+
         foreach (var com in components)
         {
             // 이 컴포넌트의 원본 프리팹이 prefabRoot인지 확인
@@ -144,10 +187,12 @@ public class SerializeFieldEditor : Editor
                 continue;
             }
 
-            InjectFields(com);
+            if (InjectFields(com))
+                isChanged = true;
         }
 
-        PrefabUtility.SavePrefabAsset(prefabRoot);
+        if (isChanged)
+            PrefabUtility.SavePrefabAsset(prefabRoot);
     }
 
     static void InjectFromAllScenes()
