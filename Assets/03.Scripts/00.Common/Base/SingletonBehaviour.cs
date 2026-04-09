@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 
+[InjectionByEditor]
 public class SingletonBehaviour<T> : BaseBehaviour where T : SingletonBehaviour<T>
 {
     private static T s_instance;

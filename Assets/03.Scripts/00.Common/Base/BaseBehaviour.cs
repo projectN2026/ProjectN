@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 
+[InjectionByEditor]
 public class BaseBehaviour : MonoBehaviour
 {
     protected bool IsInit { get; private set; }
