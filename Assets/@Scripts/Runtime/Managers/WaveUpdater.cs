@@ -2,26 +2,21 @@
 using System.Collections;
 using UnityEngine;
 
-public class WaveUpdater : SingletonBehaviour<WaveUpdater>
+public class WaveUpdater : BaseBehaviour
 {
     private int _wave = 1;
     private float _remainingTime = 20f;
     private event Action _onChangeWave;
 
-    public static event Action OnChangeWave
+    public int Wave
     {
-        add { Instance._onChangeWave += value; }
-        remove { Instance._onChangeWave -= value; }
+        get { return _wave; }
+        set { _wave = value; _onChangeWave?.Invoke(); }
     }
-    public static int Wave
+    public float RemainingTime
     {
-        get { return Instance._wave; }
-        set { Instance._wave = value; Instance._onChangeWave?.Invoke(); }
-    }
-    public static float RemainingTime
-    {
-        get { return Instance._remainingTime; }
-        set { Instance._remainingTime = value; }
+        get { return _remainingTime; }
+        set { _remainingTime = value; }
     }
 
     protected override void Start()
@@ -45,7 +40,7 @@ public class WaveUpdater : SingletonBehaviour<WaveUpdater>
         {
             Wave++;
             RemainingTime = 20f;
-            PopupManager.ShowPopup<CardSelectPopup>();
+            Managers.PopupManager.ShowPopup<CardSelectPopup>();
         }
     }
     private IEnumerator UpdateEnemySpawn()

@@ -6,7 +6,7 @@ public class CameraController : BaseBehaviour
     {
         base.FixedUpdate();
 
-        var target = ObjectManager.Player;
+        var target = Managers.ObjectManager.Player;
         if (target == null)
             return;
 

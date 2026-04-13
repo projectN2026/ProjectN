@@ -10,10 +10,10 @@ public class GameCanvas : BaseBehaviour
     {
         base.LateUpdate();
 
-        var wave = WaveUpdater.Wave;
+        var wave = Managers.WaveUpdater.Wave;
         _waveText.text = $"웨이브 : {wave}";
 
-        var time = (int)WaveUpdater.RemainingTime;
+        var time = (int)Managers.WaveUpdater.RemainingTime;
         var m = time / 60;
         var s = time % 60;
         _remainingTimeText.text = $"{m:D2}:{s:D2}";

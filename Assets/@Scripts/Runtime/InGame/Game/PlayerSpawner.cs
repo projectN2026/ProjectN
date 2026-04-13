@@ -6,6 +6,6 @@ public class PlayerSpawner : BaseBehaviour
     {
         base.Start();
 
-        ObjectManager.SummonPlayer(new Vector3(0f, 0f));
+        Managers.ObjectManager.SummonPlayer(new Vector3(0f, 0f));
     }
 }

@@ -1,18 +1,18 @@
 ﻿using UnityEngine;
 
-public class ObjectManager : SingletonBehaviour<ObjectManager>
+public class ObjectManager 
 {
     private PlayerController _player;
-    public static PlayerController Player 
+    public PlayerController Player 
     {
-        get => Instance._player;
-        private set => Instance._player = value;
+        get => _player;
+        private set => _player = value;
     }
 
-    public static void SummonPlayer(Vector2 position)
+    public void SummonPlayer(Vector2 position)
     {
         var prefab = Resources.Load<GameObject>("Prefabs/Object/Player");
-        var go = Instantiate(prefab);
+        var go = GameObject.Instantiate(prefab);
         go.transform.position = position;
         Player = go.GetComponent<PlayerController>();
     }
@@ -20,7 +20,7 @@ public class ObjectManager : SingletonBehaviour<ObjectManager>
     public static void SummonEnemy(Vector2 position)
     {
         var prefab = Resources.Load<GameObject>("Prefabs/Object/Enemy");
-        var go = Instantiate(prefab);
+        var go = GameObject.Instantiate(prefab);
         go.transform.position = position;
     }
 }
