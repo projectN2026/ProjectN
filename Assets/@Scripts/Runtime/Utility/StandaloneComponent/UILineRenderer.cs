@@ -24,6 +24,7 @@ public class UILineRenderer : Graphic
     protected override void OnPopulateMesh(VertexHelper vh)
     {
         vh.Clear();
+        if (isActiveAndEnabled == false) return;
         if (points.Count < 2) return;
 
         for (int i = 0; i < points.Count - 1; i++)

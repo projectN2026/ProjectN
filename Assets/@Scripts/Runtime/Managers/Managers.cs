@@ -13,6 +13,7 @@ public class Managers
     public static PopupManager PopupManager => Get<PopupManager>();
     public static ObjectManager ObjectManager => Get<ObjectManager>();
     public static WaveUpdater WaveUpdater => Get<WaveUpdater>();
+    public static GameDataManager GameDataManager => Get<GameDataManager>();
 
     private static T Get<T>() where T : class, new()
     {

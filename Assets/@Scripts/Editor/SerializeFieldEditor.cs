@@ -91,60 +91,100 @@ public class SerializeFieldEditor : Editor
 
         foreach (var field in GetFields(target))
         {
-            var fieldType = field.FieldType;
-
-            // ComponentField injection
-            if (Attribute.IsDefined(field, typeof(ComponentField)))
-            {
-                var component = target.GetComponent(fieldType);
-                if (component == null)
-                {
-                    Debug.LogWarning($"{target.gameObject.name}에서 {fieldType.Name} 컴포넌트를 찾지 못함", target);
-                    continue;
-                }
-
-                if (Equals(field.GetValue(target), component))
-                    continue;
-
-                field.SetValue(target, component);
+            if (InjectComponentField(target, field))
                 isChanged = true;
-            }
-
-            // DescendantField injection
             else
-            if (Attribute.IsDefined(field, typeof(DescendantField)))
-            {
-                var nameTofind = field.Name;
-                nameTofind = nameTofind.Replace("<", "").Replace(">k__BackingField", "");
-                nameTofind = nameTofind.TrimStart('_');
-                nameTofind = char.ToUpperInvariant(nameTofind[0]) + nameTofind[1..];
-
-                var descendant = GetDescendantRecursive(target.transform, nameTofind);
-                var descendantComponent = descendant?.GetComponent(fieldType);
-
-                if (descendant == null)
-                {
-                    Debug.LogWarning($"{target.gameObject.name}에서 {nameTofind} 이름의 자식을 찾지 못함", target);
-                    continue;
-                }
-                else if (descendantComponent == null)
-                {
-                    Debug.LogWarning($"{target.gameObject.name}의 자식 {descendant.gameObject.name}에서 {fieldType.Name} 컴포넌트를 찾지 못함", target);
-                    continue;
-                }
-
-                if (Equals(field.GetValue(target), descendantComponent))
-                    continue;
-
-                field.SetValue(target, descendantComponent);
+            if (InjectDescendantField(target, field))
                 isChanged = true;
-            }
+            else
+            if (InjectDescendantsField(target, field))
+                isChanged = true;
         }
 
         if (isChanged)
             EditorUtility.SetDirty(target);
 
         return isChanged;
+    }
+
+    static bool InjectComponentField(MonoBehaviour target, FieldInfo field)
+    {
+        if (!Attribute.IsDefined(field, typeof(ComponentField)))
+            return false;
+
+        var fieldType = field.FieldType;
+        var component = target.GetComponent(fieldType);
+        if (component == null)
+        {
+            Debug.LogWarning($"{target.gameObject.name}에서 {fieldType.Name} 컴포넌트를 찾지 못함", target);
+            return false;
+        }
+
+        if (Equals(field.GetValue(target), component))
+            return false;
+
+        field.SetValue(target, component);
+        return true;
+    }
+    static bool InjectDescendantField(MonoBehaviour target, FieldInfo field)
+    {
+        if (!Attribute.IsDefined(field, typeof(DescendantField)))
+            return false;
+
+        var fieldType = field.FieldType;
+        var nameTofind = field.Name;
+        nameTofind = nameTofind.Replace("<", "").Replace(">k__BackingField", "");
+        nameTofind = nameTofind.TrimStart('_');
+        nameTofind = char.ToUpperInvariant(nameTofind[0]) + nameTofind[1..];
+
+        var descendant = GetDescendantRecursive(target.transform, nameTofind);
+        var descendantComponent = descendant?.GetComponent(fieldType);
+
+        if (descendant == null)
+        {
+            Debug.LogWarning($"{target.gameObject.name}에서 {nameTofind} 이름의 자식을 찾지 못함", target);
+            return false;
+        }
+        else if (descendantComponent == null)
+        {
+            Debug.LogWarning($"{target.gameObject.name}의 자식 {descendant.gameObject.name}에서 {fieldType.Name} 컴포넌트를 찾지 못함", target);
+            return false;
+        }
+
+        if (Equals(field.GetValue(target), descendantComponent))
+            return false;
+
+        field.SetValue(target, descendantComponent);
+        return true;
+    }
+    static bool InjectDescendantsField(MonoBehaviour target, FieldInfo field)
+    {
+        if (!Attribute.IsDefined(field, typeof(DescendantsField)))
+            return false;
+
+        var fieldType = field.FieldType;
+        if (!fieldType.IsArray)
+        {
+            Debug.LogWarning($"{nameof(DescendantsField)}가 붙은 필드 {field.Name}필드가 배열 타입이 아님.");
+            return false;
+        }
+
+        var elementType = fieldType.GetElementType();
+        var components = target?.GetComponentsInChildren(elementType);
+        var components2 = Array.CreateInstance(elementType, components.Length);
+        Array.Copy(components, components2, components.Length);
+
+        if (components2 == null || components2.Length == 0)
+        {
+            Debug.LogWarning($"{target.gameObject.name}의 하위 오브젝트에서 {fieldType.Name} 컴포넌트를 하나도 찾지 못함", target);
+            return false;
+        }
+
+        if (Equals(field.GetValue(target), components2))
+            return false;
+
+        field.SetValue(target, components2);
+        return true;
     }
 
     static void InjectFromSceneObject(GameObject root)
