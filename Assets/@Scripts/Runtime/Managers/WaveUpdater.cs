@@ -40,7 +40,7 @@ public class WaveUpdater : BaseBehaviour
         {
             Wave++;
             RemainingTime = 20f;
-            Managers.PopupManager.ShowPopup<CardSelectPopup>();
+            Managers.PopupManager.ShowPopup<CardSelectPopup>("Prefabs/CardSelectPopup");
         }
     }
     private IEnumerator UpdateEnemySpawn()

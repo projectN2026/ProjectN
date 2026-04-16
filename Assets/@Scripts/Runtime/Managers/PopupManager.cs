@@ -4,17 +4,21 @@ using UnityEngine;
 
 public class PopupManager 
 {
-    private int _order = 0;
-    private Stack<PopupBase> _popupStack = new Stack<PopupBase>();
+    private Stack<IPopupUI> _popupStack = new Stack<IPopupUI>();
 
-    public T ShowPopup<T>() where T : PopupBase
+    public T ShowPopup<T>(string prefabPath) where T : IPopupUI
     {
         var name = typeof(T).Name;
-        var prefab = Resources.Load<GameObject>($"Prefabs/UI/{name}");
+        var prefab = Resources.Load<GameObject>(prefabPath);
+        if (prefab == null)
+            Debug.LogWarning($"{prefabPath}경로에서 프리펩을 로드 할 수 없음");
+
         var go = GameObject.Instantiate(prefab);
         var popup = go.GetComponent<T>();
+        if (popup == null)
+            Debug.LogWarning($"{prefab.name}프리펩의 인스턴스에 {typeof(T).Name}컴포넌트가 존재하지 않음");
+
         _popupStack.Push(popup);
-        _order++;
 
         return popup;
     }
@@ -25,7 +29,6 @@ public class PopupManager
             return;
 
         var popup = _popupStack.Pop();
-        GameObject.Destroy(popup.gameObject);
-        _order--;
+        GameObject.Destroy(popup.GameObject);
     }
 }

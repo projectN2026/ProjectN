@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7205398772450355130}
   - component: {fileID: 5876743929755536109}
   - component: {fileID: 6317314959447288964}
+  - component: {fileID: 3711356988655966961}
   m_Layer: 5
   m_Name: HomeUI
   m_TagString: Untagged
@@ -104,6 +105,20 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &3711356988655966961
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 261736262935860866}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72101e9bbab9c08449bb72db8b6cf03b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Project::HomeUI
+  _startButton: {fileID: 3616693908791306812}
+  _settingButton: {fileID: 4264431760848744330}
 --- !u!1 &620289556025441212
 GameObject:
   m_ObjectHideFlags: 0
@@ -554,7 +569,7 @@ MonoBehaviour:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 0}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
