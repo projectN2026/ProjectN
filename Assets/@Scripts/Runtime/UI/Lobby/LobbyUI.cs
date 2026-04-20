@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class HomeUI : BaseBehaviour
+public class LobbyUI : BaseBehaviour
 {
     [SerializeField, DescendantField] private Button _startButton;
     [SerializeField, DescendantField] private Button _settingButton;
